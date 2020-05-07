@@ -94,6 +94,10 @@ class LogisticRegressor():
                 ### 3.3 Display current results
                 if verbose:
                     print('Step:  {}\t\tLoss: {}'.format(ep, np.round(loss[-1], 5)))
+                ### 3.4 Compute accuracy
+                """
+                TODO
+                """
             result = [loss, ep_loss_list]
 
 
@@ -128,7 +132,7 @@ class LogisticRegressor():
         out = np.dot(X, self.W.transpose()).reshape(-1)
 
         ### 3. Normalize output such that threshold is 0
-        return out-self.threshold
+        return out#-self.threshold
 
 
     """
