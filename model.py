@@ -134,7 +134,7 @@ class LogisticRegressor():
     """
     def get_threshold(self, X, y):
         out = np.dot(X, self.W.transpose()).reshape(-1)
-        zeros = out[y == 0]
+        zeros = out[y == -1]
         ones = out[y == 1]
         self.threshold = (ones.min() + zeros.max())/2
 
