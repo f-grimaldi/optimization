@@ -97,6 +97,7 @@ class SGD():
         self.prm = self.prm - self.lr*gradient/np.linalg.norm(gradient)
         if self.verbose:
             print('New weights are: {}\n'.format(self.prm))
+            print('loss is: {}'.format(loss))
         ### 4. Return loss and gradient
         return loss, gradient
 
