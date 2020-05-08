@@ -1,4 +1,4 @@
-"""
+    """
 Logistic Regression Class
 """
 import numpy as np
