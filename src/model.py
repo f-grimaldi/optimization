@@ -17,19 +17,19 @@ class Model:
     """
     Fit method
     """
-    def fit(self, X, y, optimizer, epoch, verbose = 0):
+    def fit(self, X, y, optimizer, num_epochs, verbose = 0):
         """
         Parameters:
         X:             Matrix of input with shape (number_of_examples, number_of_features). np.matrix
         y:             Array/Matrix of target with shape (number_of_examples, 1). np.matrix
         optimizer:     The optimzer choosen from the available in optimizer.py. Optimizer Object
-        epoch:         The number of steps of training. Int
+        num_epochs:    The number of steps of training. Int
         verbose:       Display step information. Bool. Default is 0
         """
         ### 1. Add the bias unit to the input
         X = self.add_bias(X)
         ### 2. Run the search for the minima with the chosen optimizer
-        results = optimizer.run(X, y, epoch, verbose)
+        results = optimizer.run(X, y, num_epochs, verbose)
         ### 3. Update the weights with the last result given by the optimizer
         self.weights = results['params_list'][-1]
         ### 4. Get the best treshold
@@ -49,7 +49,7 @@ class Model:
         X = self.add_bias(X)
         # 2. Return output
         try:
-            return np.dot(X, self.weights)-self.threshold
+            return np.dot(X, self.weights) - self.threshold
         except:
             return np.dot(X, self.weights)
 
@@ -84,7 +84,6 @@ class Model:
         positive = y_pred[y == 1]
         negative = y_pred[y == -1]
         return np.mean([np.min(positive), np.max(negative)])
-
 
     """
     Various iniztialization method for the model weights
@@ -182,11 +181,11 @@ if __name__ == "__main__":
     my_loss = loss.LogisticLoss(reg_coeff=loss_params['weight_decay'])
     # Choose optimizer:
     if optim_params['type'] == 'gd':
-        optim = optimizer.GD(params=model.weights, loss= my_loss, learn_rate=optim_params['lr'])
+        optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
     elif optim_params['type'] == 'sgd':
-        optim = optimizer.SGD(params=model.weights, loss= my_loss, learn_rate=optim_params['lr'])
+        optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
     elif optim_params['type'] == 'svrg':
-        optim = optimizer.SVRG(params=model.weights, loss= my_loss, learn_rate=optim_params['lr'])
+        optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
     else:
         raise NotImplementedError
 
@@ -198,7 +197,7 @@ if __name__ == "__main__":
 
     ### Fit the model and count time taken
     start =  time.time()
-    results = model.fit(X=X_train, y=y_train, optimizer=optim, epoch=fit_params['epoch'], verbose=fit_params['verbose'])
+    results = model.fit(X=X_train, y=y_train, optimizer=optim, num_epochs=fit_params['epoch'], verbose=fit_params['verbose'])
     end = time.time()
     time_taken = end-start
     print('-Model fitted in {} second'.format(time_taken))
