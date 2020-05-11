@@ -141,18 +141,18 @@ class SAG(Optimizer):
         # Get random row index in g
         ik = np.random.choice(m)
         # Compute loss and gradient for i-th input vector
-        loss = self.loss.compute_loss(X[ik, :].reshape(-1, 1), y[ik, :], self.params)
-        gradient = self.loss.compute_gradient(X[ik, :], y[ik, :], self.params)
+        loss = self.loss.compute_loss(X[ik, :].reshape(1, -1), y[ik, :], self.params)
+        gradient = self.loss.compute_gradient(X[ik, :].reshape(1,-1), y[ik, :], self.params)
         # Compute update vector
-        update = gamma * (gradient - g[ik]) + 1/m * np.sum(g, axis=0)
+        update = gamma * (gradient - g[ik,:].reshape(-1,1)) + 1/m * np.sum(g, axis=0).reshape(-1,1)
         # Update i-th row of g
-        g[ik, :] = gradient
+        g[ik, :] = gradient.reshape(-1)
         # Update parameters with gradient
         self.params = self.params - self.learn_rate * update
         # Return either loss and gradient
         return loss, gradient
 
-    def run(self, X, y, num_epochs, verbose):
+    def run(self, X, y, num_epochs, verbose=0):
         # Initialize lists of either loss and gradient
         loss_list, params_list = [], []
         # Initialize g, matrix of previous epoch gradient
@@ -170,6 +170,8 @@ class SAG(Optimizer):
                 print('\tCurrent loss is: {}'.format(loss))
                 print('\tCurrent gradient is: {}'.format(gradient))
                 print('\tCurrent parameters are: {}'.format(self.params))
+        results = {'loss_list': loss_list, 'params_list': params_list}
+        return results
 
 
 class SVRG(Optimizer):
@@ -198,7 +200,7 @@ class SVRG(Optimizer):
         # Return either loss and gradient
         return loss, gradient
 
-    def run(self, X, y, num_epochs, verbose):
+    def run(self, X, y, num_epochs, verbose=0):
         # Initialize lists of either loss and gradient
         loss_list, params_list = [], []
         # Loop through each epoch

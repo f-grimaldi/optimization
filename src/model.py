@@ -134,8 +134,12 @@ if __name__ == "__main__":
 
     gd  = optimizer.GD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
     sgd = optimizer.SGD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    results1 =  gd.run(X, y, epochs)
+    sag = optimizer.SAG(params = np.array([[sp]]), loss=loss_fn, learn_rate=lr)
+    svrg = optimizer.SVRG(params = np.array([[sp]]), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
+    results3 = sag.run(X,y, epochs//2)
+    results4 = svrg.run(X, y, epochs//2)
     # print('\nComputed losses:\n\t{}\n'.format(losses))
     # print('Results:')
     # print('\tLosses: {}'.format(np.round(results['loss_list'], 3)))
@@ -144,10 +148,19 @@ if __name__ == "__main__":
 
 
     plt.plot(W, losses, label='Logistic Loss Function.\nLambda = {}'.format(reg_coeff))
+
     plt.scatter(results1['params_list'][:-1], results1['loss_list'][1:], c='r', s=15, label = 'Classic')
     plt.plot([float(i) for i in results1['params_list'][:-1]], results1['loss_list'][1:], c='r')
+
     plt.scatter(results2['params_list'][:-1], results2['loss_list'][1:], c='green', s=15, label = 'SGD')
     plt.plot([float(i) for i in results2['params_list'][:-1]], results2['loss_list'][1:], c='green')
+
+    plt.scatter(results3['params_list'][:-1], results3['loss_list'][1:], c='yellow', s=15, label = 'SAG')
+    plt.plot([float(i) for i in results3['params_list'][:-1]], results3['loss_list'][1:], c='yellow')
+
+    plt.scatter(results4['params_list'][:-1], results4['loss_list'][1:], c='pink', s=15, label = 'SVRG')
+    plt.plot([float(i) for i in results4['params_list'][:-1]], results4['loss_list'][1:], c='pink')
+
     plt.axvline(x=np.argmin(losses)*lims[2]+lims[0], c='black', label = 'Minimum')
     plt.xlabel('W')
     plt.ylabel('l(W; (X,y))')
@@ -173,18 +186,33 @@ if __name__ == "__main__":
 
     gd  = optimizer.GD(params =  np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
     sgd = optimizer.SGD(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    results1 =  gd.run(X, y, epochs)
+    sag = optimizer.SAG(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
+    svrg = optimizer.SVRG(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
+    results3 = sag.run(X,y, epochs//2)
+    results4 = svrg.run(X, y, epochs//2)
 
 
     p11, p12 = [], []
     p21, p22 = [], []
+    p31, p32 = [], []
+    p41, p42 = [], []
     for i in results1['params_list']:
         p11.append(float(i[0]))
         p12.append(float(i[1]))
+
     for j in results2['params_list']:
         p21.append(float(j[0]))
         p22.append(float(j[1]))
+
+    for i in results3['params_list']:
+        p31.append(float(i[0]))
+        p32.append(float(i[1]))
+
+    for j in results4['params_list']:
+        p41.append(float(j[0]))
+        p42.append(float(j[1]))
 
     w1, w2 = np.arange(-3, 5, 0.1), np.arange(-3, 5, 0.1)
     losses = np.zeros((w1.shape[0], w2.shape[0]))
@@ -206,6 +234,10 @@ if __name__ == "__main__":
                color="r", s=15, label='Classic')
     ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
                color="orange", s=15, label='SGD')
+    ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
+                color="yellow", s=15, label='SAG')
+    ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
+                color="pink", s=15, label='SVRG')
     ax.legend(loc=(0.1,0.75),frameon=0)
     ax.set_xlabel('X1')
     ax.set_ylabel('X2')
