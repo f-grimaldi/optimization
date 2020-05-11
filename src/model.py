@@ -33,7 +33,7 @@ class Model:
         ### 3. Update the weights with the last result given by the optimizer
         self.weights = results['params_list'][-1]
         ### 4. Get the best treshold
-        self.threshold = self.get_threshold(X, y)
+        #self.threshold = self.get_threshold(X, y)
         ### 4. Return the losses
         return results
 
@@ -105,162 +105,87 @@ if __name__ == "__main__":
 
     import argparse
     import time
+    from tqdm import tqdm
 
     import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import MinMaxScaler
     from sklearn.metrics import accuracy_score
 
-    ### Arguments
-    parser = argparse.ArgumentParser(description='Linear Classifier with Regularized Logistic Loss ')
-    # 1. Optimizer params
-    parser.add_argument('--optim', type=str, default='gd',
-                        help='type of optimization algorithm (gd, sgd, svrg)')
-    parser.add_argument('--lr', type=float, default=0.05,
-                        help='fixed stepsize')
-    # 2. Loss params
-    parser.add_argument('--reg_coeff', type=float, default=0.001,
-                        help='l2 regularization parameter')
 
-    # 3. Model fit params
-    parser.add_argument('--init', type=str, default='random',
-                        help='type of iniztialization: "zeros" or "random"')
-    parser.add_argument('--epochs', type=int, default=100,
-                        help='number of epochs')
-    parser.add_argument('--verbose', type=int, default=0,
-                        help='display info: 0=False, 1=True')
+    X = np.random.randint(-10, 10, (30, 1))
+    y = np.random.randint( -1,  2, (30, 1))
+    y[X <  0] = -1
+    y[X >= 0] =  1
 
-    # 4. Dataset Parameters
-    parser.add_argument('--data', type=str, default='iris',
-                        help='choose dataset (iris/mnist)')
+    print('Data:')
+    print('\tInput: {}'.format(X.transpose()))
+    print('\tTarget: {}'.format(y.transpose()))
 
-    # 5. Seed
-    parser.add_argument('--seed', type=int, default=None,
-                        help='random seed')
+    loss_fn = loss.LogisticLoss(reg_coeff = 0.02)
+    W = np.arange(-5, 10, 0.2)
+    losses = [np.round(loss_fn.compute_loss(X, y, np.array([[w]])), 3) for w in W]
 
-    args = parser.parse_args()
-    if args.seed:
-        np.random.seed(args.seed)
+    optim = optimizer.GD(params=np.array([[0]]), loss=loss_fn, learn_rate=0.02)
+    results = optim.run(X, y, 20)
 
-    print('MAIN\n-Solving a binary classification problem (-1, 1) with two classes of {} dataset'.format(args.data.upper()))
-    ### Loading and preparing data
-    ### IRIS
-    if args.data == 'iris':
-        data = load_iris()
-        inp, y = data['data'], data['target']
-        X = inp[y<2]
-        y = y[y<2]
-        y[y==0] = -1
-        y = np.reshape(y, (-1, 1))
-    ### MNIST with digit 1 and 8
-    elif args.data == 'mnist':
-        from scipy.io import loadmat
-        mnist = loadmat('MNIST.mat')
-        X, y = mnist['input_images'], mnist['output_labels']
-        X = X[(y.reshape(-1) == 1) | (y.reshape(-1) == 8)]
-        y = y[(y == 1) | (y == 8)]
-        y[y == 1] =  1
-        y[y == 8] = -1
-        y = np.reshape(y, (-1, 1))
-
-    ### Splitting dataset
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
-
-    ### Parameters
-    optim_params = {'type': args.optim, 'lr': args.lr}
-    loss_params = {'weight_decay': args.reg_coeff}
-    fit_params = {'init_weights': args.init, 'epoch': args.epochs, 'verbose': args.verbose}
-    print('-Displaying default parameters')
-    print('\tLoss parameters:\t{}'.format(loss_params))
-    print('\tOptim parameters:\t{}'.format(optim_params))
-    print('\tModel parameters:\t{}'.format(fit_params))
-
-    ### Init model, loss and optimzer
-    model = Model(input_size = X.shape[1], init_weights=fit_params['init_weights'])
-    my_loss = loss.LogisticLoss(reg_coeff=loss_params['weight_decay'])
-    # Choose optimizer:
-    if optim_params['type'] == 'gd':
-        optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
-    elif optim_params['type'] == 'sgd':
-        optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
-    elif optim_params['type'] == 'svrg':
-        optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
-    else:
-        raise NotImplementedError
-
-    ### Shape info
-    print('-Displaying shape of data and variable')
-    print('\tInput: {}'.format(X.shape))
-    print('\tTarget: {}'.format(y.shape))
-    print('\tWeights (with bias): {}'.format(model.weights.shape))
-
-    ### Fit the model and count time taken
-    start =  time.time()
-    results = model.fit(X=X_train, y=y_train, optimizer=optim, num_epochs=fit_params['epoch'], verbose=fit_params['verbose'])
-    end = time.time()
-    time_taken = end-start
-    print('-Model fitted in {} second'.format(time_taken))
-
-    ### Compute accuracy
-    y_train_pred = model.predict(X_train)
-    y_train_pred[y_train_pred >  0] =  1
-    y_train_pred[y_train_pred <= 0] = -1
-    y_pred = model.predict(X_test)
-    y_pred[y_pred >  0] =  1
-    y_pred[y_pred <= 0] = -1
-    print('-Displaying Accuracies')
-    print('\tTrain: {}'.format(accuracy_score(y_train, y_train_pred)))
-    print('\tTest: {}'.format(accuracy_score(y_test, y_pred)))
-
-    ### Display validation results
-    ### Output distribution
-    negative = y_pred[y_test == -1]
-    positive = y_pred[y_test == 1]
-    fig, ax = plt.subplots(3, 1, figsize=(20, 20))
-    ax[0].plot(negative, 'o', label='negative')
-    ax[0].plot(positive, 'o', label='positive')
-    ax[0].legend()
-    ax[0].set_title('Validation Output distribution')
-    ax[0].set_xlabel('Epochs')
-    ax[0].set_ylabel('Output')
-    ax[0].grid()
-
-    ### Loss curve
-    ax[1].plot(results['loss_list'])
-    ax[1].set_title('Loss curve')
-    ax[1].set_xlabel('Epochs')
-    ax[1].set_ylabel('Loss')
-    ax[1].grid()
-
-    ### Computing accuracy for each step
-    X_testb = model.add_bias(X_test)
-    accuracy_list = []
-
-    for weights in results['params_list']:
-        # 1. Get output
-        y_pred = np.dot(X_testb, weights)
-        # 2. Compute threshold and accuracy
-        positive = y_pred[y_test ==  1]
-        negative = y_pred[y_test == -1]
-        # 2.a check which class is below threshold
-        if np.min(negative) <= np.min(positive):
-            threshold = np.mean([np.min(positive), np.max(negative)])
-            y_pred[y_pred - threshold >  0] =  1
-            y_pred[y_pred - threshold <= 0] = -1
-        else:
-            threshold = np.mean([np.min(negative), np.max(positive)])
-            y_pred[y_pred - threshold >  0] = -1
-            y_pred[y_pred - threshold <= 0] =  1
-        # 2.b
-        accuracy_list.append(accuracy_score(y_test, y_pred))
-
-    ### Accuracy plot
-    ax[2].plot(accuracy_list)
-    ax[2].set_title('Validation Accuracy over step')
-    ax[2].set_xlabel('Step')
-    ax[2].set_ylabel('Accuracy')
-    ax[2].grid()
+    print('\nComputed losses:\n\t{}\n'.format(losses))
+    print('Results:')
+    print('\tLosses: {}'.format(np.round(results['loss_list'], 3)))
+    print('\tParams: {}'.format([np.round(float(i[0]), 3) for i in results['params_list']]))
+    print('\tOutput: {}'.format(np.dot(X, results['params_list'][-1]).transpose()))
 
 
+    plt.plot(W, losses, label='Logistic Loss Function')
+    plt.scatter(results['params_list'][:-1], results['loss_list'][1:], c='r', s=15, label = 'Optimizer step')
+    plt.xlabel('W')
+    plt.ylabel('l(W; (X,y))')
+    plt.title('1D dimension example')
+    plt.legend()
+    plt.grid()
     plt.show()
+
+
+    ### Create input and output
+    X = np.random.randint(-5, 5, (100, 1))
+    y = np.random.randint(-1, 2, (100, 1))
+    y[X <  2] = -1
+    y[X >= 2] =  1
+    mat = np.zeros((X.shape[0], X.shape[1]+1))
+    mat[:, :-1] = X
+    mat[:,  -1] = 1
+    X = mat
+
+    loss_fn = loss.LogisticLoss(reg_coeff = 0.1)
+    optim = optimizer.GD(params=np.random.randn(2, 1), loss=loss_fn, learn_rate=0.3)
+    results = optim.run(X, y, 30)
+    p1, p2 = [], []
+    for i in results['params_list']:
+        p1.append(i[0])
+        p2.append(i[1])
+
+
+    w1, w2 = np.arange(-3, 5, 0.1), np.arange(-3, 5, 0.1)
+    losses = np.zeros((w1.shape[0], w2.shape[0]))
+    for i in tqdm(range(w1.shape[0])):
+        for j in range(w2.shape[0]):
+            l = loss_fn.compute_loss(X, y, np.array([w1[i], w2[j]]))
+            losses[i, j] = l
+
+    W1, W2 = np.meshgrid(w1,w2)
+    fig = plt.figure(figsize=(6,6))
+    ax = fig.add_subplot(111, projection='3d')
+    # Plot a 3D surface
+    ax.set_title('2D example (with bias)')
+    ax.plot_wireframe(W1, W2, losses, rstride=5, cstride=5)
+    ax.scatter(p1[:-1], p2[:-1], results['loss_list'][1:], color="r", s=15)
+    ax.set_xlabel('X1')
+    ax.set_ylabel('X2')
+    plt.show()
+
+    print('Loss: ', results['loss_list'][-1])
+    print('Params: ', results['params_list'][-1])
+    print('Computed Loss: ', loss_fn.compute_loss(X, y, np.array(results['params_list'][-1])))
+    print(results['loss_list'])

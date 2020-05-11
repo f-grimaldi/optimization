@@ -59,6 +59,7 @@ class GD(Optimizer):
         ### 1. Compute loss and gradient
         crnt_loss = self.loss.compute_loss(X, y, self.params)
         crnt_gradient = self.loss.compute_gradient(X, y, self.params)
+        #print('Current gradient shape is: {}'.format(crnt_gradient.shape))
         ### 2. Update phase
         self.params = self.params - self.learn_rate*crnt_gradient
         return crnt_loss, crnt_gradient
@@ -90,12 +91,13 @@ class GD(Optimizer):
         """
         TODO: Stop criterion
         """
-        return loss_list, params_list
+        results = {'loss_list': loss_list, 'params_list': params_list}
+        return results
 
 
 class SGD(GD):
 
-    def run(self, X, y, num_epochs, verbose):
+    def run(self, X, y, num_epochs, verbose=0):
         """
         Parameters:
         X: matrix of input with shape (number_inputs, number_features)
@@ -112,7 +114,7 @@ class SGD(GD):
             # Choose a random realization among the input dataset
             for i in np.random.choice(m, m, replace=True):
                 # Update parameters, get loss and gradient
-                loss, gradient = self.step(X[i, :], y[i, :])
+                loss, gradient = self.step(X[i, :].reshape(1, -1), y[i, :])
                 # Store loss and gradient for current step
                 loss_list.append(loss)
                 params_list.append(self.params)
@@ -126,7 +128,8 @@ class SGD(GD):
         """
         TODO: Stop criterion
         """
-        return loss_list, params_list
+        results = {'loss_list': loss_list, 'params_list': params_list}
+        return results
 
 
 class SAG(Optimizer):
