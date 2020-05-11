@@ -32,8 +32,6 @@ class Model:
         results = optimizer.run(X, y, num_epochs, verbose)
         ### 3. Update the weights with the last result given by the optimizer
         self.weights = results['params_list'][-1]
-        ### 4. Get the best treshold
-        #self.threshold = self.get_threshold(X, y)
         ### 4. Return the losses
         return results
 
@@ -48,10 +46,7 @@ class Model:
         # 1. Add bias
         X = self.add_bias(X)
         # 2. Return output
-        try:
-            return np.dot(X, self.weights) - self.threshold
-        except:
-            return np.dot(X, self.weights)
+        return np.dot(X, self.weights)
 
     """
     Add a bias/slope to the input
