@@ -21,6 +21,8 @@ if __name__ == '__main__':
                       help='type of optimization algorithm (gd, sgd, svrg)')
   parser.add_argument('--lr', type=float, default=0.05,
                       help='fixed stepsize')
+  parser.add_argument('--iter_epoch', type=int, default=10,
+                      help='iter epoch used only in svrg')
   # 2. Loss params
   parser.add_argument('--reg_coeff', type=float, default=0.001,
                       help='l2 regularization parameter')
@@ -70,7 +72,7 @@ if __name__ == '__main__':
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
 
   ### Parameters
-  optim_params = {'type': args.optim, 'lr': args.lr}
+  optim_params = {'type': args.optim, 'lr': args.lr, 'iter_epoch': args.iter_epoch}
   loss_params = {'weight_decay': args.reg_coeff}
   fit_params = {'init_weights': args.init, 'epoch': args.epochs, 'verbose': args.verbose}
   print('-Displaying default parameters')
@@ -87,7 +89,7 @@ if __name__ == '__main__':
   elif optim_params['type'] == 'sgd':
       optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
   elif optim_params['type'] == 'svrg':
-      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
+      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], iter_epoch = optim_params['iter_epoch'])
   else:
       raise NotImplementedError
 
