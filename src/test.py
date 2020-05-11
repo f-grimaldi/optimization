@@ -8,6 +8,7 @@ if __name__ == '__main__':
 
   import numpy as np
   import matplotlib.pyplot as plt
+  from tqdm import tqdm
   from sklearn.datasets import load_iris
   from sklearn.model_selection import train_test_split
   from sklearn.preprocessing import MinMaxScaler
@@ -25,7 +26,7 @@ if __name__ == '__main__':
                       help='l2 regularization parameter')
 
   # 3. Model fit params
-  parser.add_argument('--init', type=str, default='random',
+  parser.add_argument('--init', type=str, default='zeros',
                       help='type of iniztialization: "zeros" or "random"')
   parser.add_argument('--epochs', type=int, default=100,
                       help='number of epochs')
@@ -102,7 +103,6 @@ if __name__ == '__main__':
   end = time.time()
   time_taken = end-start
   print('-Model fitted in {} second'.format(time_taken))
-  print('-Weights are: {}'.format(model.weights))
 
   ### Compute accuracy
   y_train_pred = model.predict(X_train)
@@ -139,7 +139,7 @@ if __name__ == '__main__':
   X_testb = model.add_bias(X_test)
   accuracy_list = []
 
-  for weights in results['params_list']:
+  for weights in tqdm(results['params_list']):
       # 1. Get output
       y_pred = np.dot(X_testb, weights)
       # 2. Compute threshold and accuracy
