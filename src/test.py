@@ -13,23 +13,27 @@ if __name__ == '__main__':
   from sklearn.model_selection import train_test_split
   from sklearn.preprocessing import MinMaxScaler
   from sklearn.metrics import accuracy_score
+  from tabulate import tabulate
 
   ### Arguments
   parser = argparse.ArgumentParser(description='Linear Classifier with Regularized Logistic Loss ')
   # 1. Optimizer params
   parser.add_argument('--optim', type=str, default='gd',
-                      help='type of optimization algorithm (gd, sgd, svrg)')
+                      help='type of optimization algorithm (gd, sgd, sag, svrg)')
   parser.add_argument('--lr', type=float, default=0.05,
                       help='fixed stepsize')
+  parser.add_argument('--tollerance', type=float, default=0.001,
+                      help='stopping criterion tollerance')
   parser.add_argument('--iter_epoch', type=int, default=10,
                       help='iter epoch used only in svrg')
+
   # 2. Loss params
   parser.add_argument('--reg_coeff', type=float, default=0.001,
                       help='l2 regularization parameter')
 
   # 3. Model fit params
   parser.add_argument('--init', type=str, default='zeros',
-                      help='type of iniztialization: "zeros" or "random"')
+                      help='type of initialization: "zeros" or "random"')
   parser.add_argument('--epochs', type=int, default=100,
                       help='number of epochs')
   parser.add_argument('--verbose', type=int, default=0,
@@ -72,7 +76,7 @@ if __name__ == '__main__':
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
 
   ### Parameters
-  optim_params = {'type': args.optim, 'lr': args.lr, 'iter_epoch': args.iter_epoch}
+  optim_params = {'type': args.optim, 'lr': args.lr, 'iter_epoch': args.iter_epoch, 'tollerance': args.tollerance}
   loss_params = {'weight_decay': args.reg_coeff}
   fit_params = {'init_weights': args.init, 'epoch': args.epochs, 'verbose': args.verbose}
   print('-Displaying default parameters')
@@ -85,13 +89,13 @@ if __name__ == '__main__':
   my_loss = loss.LogisticLoss(reg_coeff=loss_params['weight_decay'])
   # Choose optimizer:
   if optim_params['type'] == 'gd':
-      optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
+      optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
   elif optim_params['type'] == 'sgd':
-      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
+      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
   elif optim_params['type'] == 'sag':
-      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
+      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
   elif optim_params['type'] == 'svrg':
-      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], iter_epoch=optim_params['iter_epoch'])
+      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'], iter_epoch=optim_params['iter_epoch'])
   else:
       raise NotImplementedError
 
@@ -146,7 +150,7 @@ if __name__ == '__main__':
   accuracy_list = []
 
   print('Starting to compute accuracy on every step.')
-  print('If it takes too long maybe is beacuse using SGD with a discrete number of epochs')
+  print('If it takes too long maybe is because using SGD with a discrete number of epochs')
   for weights in tqdm(results['params_list']):
       # 1. Get output
       y_pred = np.dot(X_testb, weights)
@@ -176,3 +180,9 @@ if __name__ == '__main__':
                   ax[i, j].set_title('Predicted 7 with probability {}'.format(1 - 1/(1 + np.exp(-output))))
 
   plt.show()
+
+  # Display Loss and Time at each Epoch
+  disp = []
+  for i in range(fit_params["epoch"]):
+      disp.append([i + 1, results["loss_list"][i], results["time_list"][i]])
+  print(tabulate(disp, headers=['Epoch', 'Loss', 'Time']))

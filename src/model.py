@@ -125,6 +125,7 @@ if __name__ == "__main__":
     reg_coeff = 0.3
     lims = (-7, 3, 0.2)
     lr = 0.05
+    toll = 0.001
     epochs = 40
     starting_point = sp = -5
 
@@ -132,10 +133,10 @@ if __name__ == "__main__":
     W = np.arange(lims[0], lims[1], lims[2])
     losses = [np.round(loss_fn.compute_loss(X, y, np.array([[w]])), 3) for w in W]
 
-    gd = optimizer.GD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    sgd = optimizer.SGD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    sag = optimizer.SAG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    svrg = optimizer.SVRG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    gd = optimizer.GD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    sgd = optimizer.SGD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    sag = optimizer.SAG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    svrg = optimizer.SVRG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, tollerance=toll, iter_epoch=10)
     results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
     results3 = sag.run(X, y, epochs//2)
@@ -184,10 +185,10 @@ if __name__ == "__main__":
     loss_fn = loss.LogisticLoss(reg_coeff=0.1)
 
 
-    gd = optimizer.GD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    sgd = optimizer.SGD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    sag = optimizer.SAG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    svrg = optimizer.SVRG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    gd = optimizer.GD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    sgd = optimizer.SGD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    sag = optimizer.SAG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, tollerance=toll)
+    svrg = optimizer.SVRG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, tollerance=toll, iter_epoch=10)
     results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
     results3 = sag.run(X, y, epochs//2)

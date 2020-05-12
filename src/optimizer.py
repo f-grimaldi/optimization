@@ -6,7 +6,7 @@ General class of Optimizer
 """
 class Optimizer:
 
-    def __init__(self, params, loss, learn_rate):
+    def __init__(self, params, loss, learn_rate, tollerance):
         """
         Parameters:
         params: array of 'weights' used as variable in the optimization with shape (number_features, 1)
@@ -16,6 +16,7 @@ class Optimizer:
         self.params = params
         self.learn_rate = learn_rate
         self.loss = loss
+        self.tollerance = tollerance
 
     """
     Step rule
@@ -91,10 +92,9 @@ class GD(Optimizer):
                 print('\tCurrent gradient is: {}'.format(gradient))
                 print('\tCurrent parameters are: {}'.format(self.params))
                 print('\tElapsed time is: {}'.format(time_list[-1]))
-
-        """
-        TODO: Stop criterion
-        """
+            ### Stopping criterion
+            if np.linalg.norm(gradient) < self.tollerance:
+                break
         results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
         return results
 
@@ -131,10 +131,9 @@ class SGD(GD):
                     print('\tCurrent gradient is: {}'.format(gradient))
                     print('\tCurrent parameters are: {}'.format(self.params))
                     print('\tElapsed time is: {}'.format(time_list[-1]))
-
-        """
-        TODO: Stop criterion
-        """
+                ### Stopping criterion
+                if np.linalg.norm(gradient) < self.tollerance:
+                    break
         results = {'loss_list': loss_list, 'params_list': params_list}
         return results
 
@@ -180,6 +179,9 @@ class SAG(Optimizer):
                 print('\tCurrent gradient is: {}'.format(gradient))
                 print('\tCurrent parameters are: {}'.format(self.params))
                 print('\tElapsed time is: {}'.format(time_list[-1]))
+            ### Stopping criterion
+            if np.linalg.norm(gradient) < self.tollerance:
+                break
         results = {'loss_list': loss_list, 'params_list': params_list}
         return results
 
@@ -187,9 +189,9 @@ class SAG(Optimizer):
 class SVRG(Optimizer):
 
     # Constructor
-    def __init__(self, params, loss, learn_rate, iter_epoch, prev_params=None):
+    def __init__(self, params, loss, learn_rate, tollerance, iter_epoch, prev_params=None):
         # Call parent constructor
-        super().__init__(params, loss, learn_rate)
+        super().__init__(params, loss, learn_rate, tollerance)
         # Set previous parameters
         self.prev_params = params if not prev_params else prev_params
         self.iter_epoch = iter_epoch
@@ -235,5 +237,8 @@ class SVRG(Optimizer):
                     print('\tElapsed time is: {}'.format(time_list[-1]))
             # Update stored parameters
             self.prev_params = self.params.copy()
+            ### Stopping criterion
+            if np.linalg.norm(gradient) < self.tollerance:
+                break
         results = {'loss_list': loss_list, 'params_list': params_list}
         return results
