@@ -183,6 +183,7 @@ if __name__ == '__main__':
 
   # Display Loss and Time at each Epoch
   disp = []
-  for i in range(fit_params["epoch"]):
-      disp.append([i + 1, results["loss_list"][i], results["time_list"][i]])
+  for epoch in range(fit_params["epoch"]):
+      if (epoch + 1) % 10 == 0:
+        disp.append([epoch + 1, results["loss_list"][epoch], results["time_list"][epoch]])
   print(tabulate(disp, headers=['Epoch', 'Loss', 'Time']))
