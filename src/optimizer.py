@@ -134,7 +134,7 @@ class SGD(GD):
                 ### Stopping criterion
                 if np.linalg.norm(gradient) < self.tollerance:
                     break
-        results = {'loss_list': loss_list, 'params_list': params_list}
+        results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
         return results
 
 
@@ -182,7 +182,7 @@ class SAG(Optimizer):
             ### Stopping criterion
             if np.linalg.norm(gradient) < self.tollerance:
                 break
-        results = {'loss_list': loss_list, 'params_list': params_list}
+        results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
         return results
 
 
@@ -240,5 +240,5 @@ class SVRG(Optimizer):
             ### Stopping criterion
             if np.linalg.norm(gradient) < self.tollerance:
                 break
-        results = {'loss_list': loss_list, 'params_list': params_list}
+        results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
         return results
