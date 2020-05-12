@@ -33,8 +33,8 @@ class LogisticLoss(Loss):
         """
 
         activation = np.dot(X, W)
-        regularization = 0.5*self.reg_coeff*np.linalg.norm(W)**2
-        log_argument = 1 + np.exp(-y.transpose()*activation.reshape(-1))
+        regularization = 0.5 * self.reg_coeff * np.linalg.norm(W) ** 2
+        log_argument = 1 + np.exp(-y.transpose() * activation.reshape(-1))
         loss = np.mean(np.log(log_argument)) + regularization
 
         return loss
@@ -48,14 +48,14 @@ class LogisticLoss(Loss):
         """
 
         activation = np.dot(X, W)
-        sigmoid = 1 / (1 + np.exp(-y.transpose()*activation.reshape(-1)))
-        regularization = self.reg_coeff*W
+        sigmoid = 1 / (1 + np.exp(-y.transpose() * activation.reshape(-1)))
+        regularization = self.reg_coeff * W
         target_x_output = y.transpose() * (1-sigmoid)
 
         if X.shape[0] > 1:
             gradient = -np.mean(target_x_output.transpose()*X, axis=0).reshape(-1, 1) + regularization
         else:
-            gradient =  -target_x_output.transpose()*X.transpose()  + regularization
+            gradient = -target_x_output.transpose() * X.transpose() + regularization
 
 
         # print('y*(1-sigmoid(y*XW)) is: {}'.format(target_x_output))

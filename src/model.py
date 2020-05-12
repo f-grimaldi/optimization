@@ -9,7 +9,7 @@ class Model:
         """
         Parameters:
         input_size:     the number of features. Int
-        init_weights:   the type of  weights iniztialization. It can be random or zeros.
+        init_weights:   the type of  weights initialization. It can be random or zeros.
         """
         self.input_size = input_size
         self.init_weights(init_weights)
@@ -17,7 +17,7 @@ class Model:
     """
     Fit method
     """
-    def fit(self, X, y, optimizer, num_epochs, verbose = 0):
+    def fit(self, X, y, optimizer, num_epochs, verbose=0):
         """
         Parameters:
         X:             Matrix of input with shape (number_of_examples, number_of_features). np.matrix
@@ -66,7 +66,7 @@ class Model:
         return mat
 
     """
-    To implement if the threshold of the ooutput is neither 0.5 or 0
+    To implement if the threshold of the output is neither 0.5 or 0
     """
     def get_threshold(self, X, y):
         """
@@ -81,7 +81,7 @@ class Model:
         return np.mean([np.min(positive), np.max(negative)])
 
     """
-    Various iniztialization method for the model weights
+    Various initialization method for the model weights
     """
     def init_weights(self, init_type):
         ### 1. Initalize the weghts
@@ -113,9 +113,9 @@ if __name__ == "__main__":
 
 
     X = np.random.randint(-10, 10, (20, 1))
-    y = np.random.randint( -1,  2, (20, 1))
-    y[X <  0] = -1
-    y[X >= 0] =  1
+    y = np.random.randint(-1,  2, (20, 1))
+    y[X < 0] = -1
+    y[X >= 0] = 1
 
     # print('Data:')
     # print('\tInput: {}'.format(X.transpose()))
@@ -128,17 +128,17 @@ if __name__ == "__main__":
     epochs = 40
     starting_point = sp = -5
 
-    loss_fn = loss.LogisticLoss(reg_coeff = reg_coeff)
+    loss_fn = loss.LogisticLoss(reg_coeff=reg_coeff)
     W = np.arange(lims[0], lims[1], lims[2])
     losses = [np.round(loss_fn.compute_loss(X, y, np.array([[w]])), 3) for w in W]
 
-    gd  = optimizer.GD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
+    gd = optimizer.GD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
     sgd = optimizer.SGD(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    sag = optimizer.SAG(params = np.array([[sp]]), loss=loss_fn, learn_rate=lr)
-    svrg = optimizer.SVRG(params = np.array([[sp]]), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    sag = optimizer.SAG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr)
+    svrg = optimizer.SVRG(params=np.array([[sp]]), loss=loss_fn, learn_rate=lr, iter_epoch=10)
     results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
-    results3 = sag.run(X,y, epochs//2)
+    results3 = sag.run(X, y, epochs//2)
     results4 = svrg.run(X, y, epochs//2)
     # print('\nComputed losses:\n\t{}\n'.format(losses))
     # print('Results:')
@@ -149,19 +149,19 @@ if __name__ == "__main__":
 
     plt.plot(W, losses, label='Logistic Loss Function.\nLambda = {}'.format(reg_coeff))
 
-    plt.scatter(results1['params_list'][:-1], results1['loss_list'][1:], c='r', s=15, label = 'Classic')
+    plt.scatter(results1['params_list'][:-1], results1['loss_list'][1:], c='r', s=15, label='Classic')
     plt.plot([float(i) for i in results1['params_list'][:-1]], results1['loss_list'][1:], c='r')
 
     plt.scatter(results2['params_list'][:-1], results2['loss_list'][1:], c='green', s=15, label = 'SGD')
     plt.plot([float(i) for i in results2['params_list'][:-1]], results2['loss_list'][1:], c='green')
 
-    plt.scatter(results3['params_list'][:-1], results3['loss_list'][1:], c='yellow', s=15, label = 'SAG')
+    plt.scatter(results3['params_list'][:-1], results3['loss_list'][1:], c='yellow', s=15, label='SAG')
     plt.plot([float(i) for i in results3['params_list'][:-1]], results3['loss_list'][1:], c='yellow')
 
-    plt.scatter(results4['params_list'][:-1], results4['loss_list'][1:], c='pink', s=15, label = 'SVRG')
+    plt.scatter(results4['params_list'][:-1], results4['loss_list'][1:], c='pink', s=15, label='SVRG')
     plt.plot([float(i) for i in results4['params_list'][:-1]], results4['loss_list'][1:], c='pink')
 
-    plt.axvline(x=np.argmin(losses)*lims[2]+lims[0], c='black', label = 'Minimum')
+    plt.axvline(x=np.argmin(losses)*lims[2]+lims[0], c='black', label='Minimum')
     plt.xlabel('W')
     plt.ylabel('l(W; (X,y))')
     plt.title('2D dimension example')
@@ -174,23 +174,23 @@ if __name__ == "__main__":
     ### Create input and output
     X = np.random.randint(-5, 5, (100, 1))
     y = np.random.randint(-1, 2, (100, 1))
-    y[X <  2] = -1
-    y[X >= 2] =  1
+    y[X < 2] = -1
+    y[X >= 2] = 1
     mat = np.zeros((X.shape[0], X.shape[1]+1))
     mat[:, :-1] = X
     mat[:,  -1] = 1
     X = mat
 
-    loss_fn = loss.LogisticLoss(reg_coeff = 0.1)
+    loss_fn = loss.LogisticLoss(reg_coeff=0.1)
 
 
-    gd  = optimizer.GD(params =  np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    sgd = optimizer.SGD(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    sag = optimizer.SAG(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
-    svrg = optimizer.SVRG(params = np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, iter_epoch=10)
+    gd = optimizer.GD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
+    sgd = optimizer.SGD(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
+    sag = optimizer.SAG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr)
+    svrg = optimizer.SVRG(params=np.array([-2, -2]).reshape(2, 1), loss=loss_fn, learn_rate=lr, iter_epoch=10)
     results1 = gd.run(X, y, epochs)
     results2 = sgd.run(X, y, epochs//3)
-    results3 = sag.run(X,y, epochs//2)
+    results3 = sag.run(X, y, epochs//2)
     results4 = svrg.run(X, y, epochs//2)
 
 
@@ -221,15 +221,15 @@ if __name__ == "__main__":
             l = loss_fn.compute_loss(X, y, np.array([w1[i], w2[j]]))
             losses[j, i] = l
 
-    W1, W2 = np.meshgrid(w1,w2)
-    fig = plt.figure(figsize=(6,6))
+    W1, W2 = np.meshgrid(w1, w2)
+    fig = plt.figure(figsize=(6, 6))
     ax = fig.add_subplot(111, projection='3d')
     # Plot a 3D surface
     ax.set_title('2D example (with bias)')
     ax.plot_wireframe(W1, W2, losses, rstride=5, cstride=5, label='Logistic Loss Surface')
     cset = ax.contourf(W1, W2, losses, zdir='z', offset=np.min(losses), cmap=cm.ocean)
-    #cset = ax.contourf(W1, W2, losses, zdir='x', offset=-5, cmap=cm.ocean)
-    #cset = ax.contourf(W1, W2, losses, zdir='y', offset=5, cmap=cm.ocean)
+    # cset = ax.contourf(W1, W2, losses, zdir='x', offset=-5, cmap=cm.ocean)
+    # cset = ax.contourf(W1, W2, losses, zdir='y', offset=5, cmap=cm.ocean)
     ax.scatter(p11[:-1], p12[:-1], results1['loss_list'][1:],
                color="r", s=15, label='Classic')
     ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
@@ -238,7 +238,7 @@ if __name__ == "__main__":
                 color="yellow", s=15, label='SAG')
     ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
                 color="pink", s=15, label='SVRG')
-    ax.legend(loc=(0.1,0.75),frameon=0)
+    ax.legend(loc=(0.1, 0.75), frameon=0)
     ax.set_xlabel('X1')
     ax.set_ylabel('X2')
     ax.set_zlabel('Loss')

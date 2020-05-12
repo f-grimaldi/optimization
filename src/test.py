@@ -53,9 +53,9 @@ if __name__ == '__main__':
   if args.data == 'iris':
       data = load_iris()
       inp, y = data['data'], data['target']
-      X = inp[y<2]
-      y = y[y<2]
-      y[y==0] = -1
+      X = inp[y < 2]
+      y = y[y < 2]
+      y[y == 0] = -1
       y = np.reshape(y, (-1, 1))
   ### MNIST with digit 1 and 7
   elif args.data == 'mnist':
@@ -64,7 +64,7 @@ if __name__ == '__main__':
       X, y = mnist['input_images'], mnist['output_labels']
       X = X[(y.reshape(-1) == 1) | (y.reshape(-1) == 7)]
       y = y[(y == 1) | (y == 7)]
-      y[y == 1] =  1
+      y[y == 1] = 1
       y[y == 7] = -1
       y = np.reshape(y, (-1, 1))
 
@@ -81,15 +81,17 @@ if __name__ == '__main__':
   print('\tModel parameters:\t{}'.format(fit_params))
 
   ### Init model, loss and optimzer
-  model = model.Model(input_size = X.shape[1], init_weights=fit_params['init_weights'])
+  model = model.Model(input_size=X.shape[1], init_weights=fit_params['init_weights'])
   my_loss = loss.LogisticLoss(reg_coeff=loss_params['weight_decay'])
   # Choose optimizer:
   if optim_params['type'] == 'gd':
       optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
   elif optim_params['type'] == 'sgd':
       optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
+  elif optim_params['type'] == 'sag':
+      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'])
   elif optim_params['type'] == 'svrg':
-      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], iter_epoch = optim_params['iter_epoch'])
+      optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], iter_epoch=optim_params['iter_epoch'])
   else:
       raise NotImplementedError
 
@@ -100,7 +102,7 @@ if __name__ == '__main__':
   print('\tWeights (with bias): {}'.format(model.weights.shape))
 
   ### Fit the model and count time taken
-  start =  time.time()
+  start = time.time()
   results = model.fit(X=X_train, y=y_train, optimizer=optim, num_epochs=fit_params['epoch'], verbose=fit_params['verbose'])
   end = time.time()
   time_taken = end-start
@@ -110,12 +112,12 @@ if __name__ == '__main__':
   y_pred = model.predict(X_test)
   y_train_pred = model.predict(X_train)
   negative = 1/(1+np.exp(-y_pred[y_test == -1]))
-  positive = 1/(1+np.exp(-y_pred[y_test ==  1]))
+  positive = 1/(1+np.exp(-y_pred[y_test == 1]))
 
   ### Compute accuracy
-  y_train_pred[y_train_pred >  0] =  1
+  y_train_pred[y_train_pred > 0] = 1
   y_train_pred[y_train_pred <= 0] = -1
-  y_pred[y_pred >  0] =  1
+  y_pred[y_pred > 0] = 1
   y_pred[y_pred <= 0] = -1
   print('-Displaying Accuracies')
   print('\tTrain: {}'.format(accuracy_score(y_train, y_train_pred)))
@@ -149,7 +151,7 @@ if __name__ == '__main__':
       # 1. Get output
       y_pred = np.dot(X_testb, weights)
       # 2. Compute accuracy
-      y_pred[y_pred >  0] = 1
+      y_pred[y_pred > 0] = 1
       y_pred[y_pred <= 0] = -1
       accuracy_list.append(accuracy_score(y_test, y_pred))
 

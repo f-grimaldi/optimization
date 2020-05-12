@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 """
 General class of Optimizer
@@ -59,9 +60,9 @@ class GD(Optimizer):
         ### 1. Compute loss and gradient
         crnt_loss = self.loss.compute_loss(X, y, self.params)
         crnt_gradient = self.loss.compute_gradient(X, y, self.params)
-        #print('Current gradient shape is: {}'.format(crnt_gradient.shape))
+        # print('Current gradient shape is: {}'.format(crnt_gradient.shape))
         ### 2. Update phase
-        self.params = self.params - self.learn_rate*crnt_gradient
+        self.params = self.params - self.learn_rate * crnt_gradient
         return crnt_loss, crnt_gradient
 
     def run(self, X, y, num_epochs, verbose=0):
@@ -73,25 +74,28 @@ class GD(Optimizer):
         verbose: boolean indicating if display step information. Default is 0
         """
         ### 1. Init list where to save results
-        loss_list = []
-        params_list = []
+        loss_list, params_list, time_list = [], [], []
         ### 2. Main iteration of step
+        start_time = time.time()
         for n in range(num_epochs):
             ### 2.1 Call step to return loss and gradient and update parameters
             loss, gradient = self.step(X, y)
             ### 2.2 Save current loss and parameters
             loss_list.append(loss)
             params_list.append(self.params)
+            time_list.append(time.time() - start_time)
             ### 2.3 Display info if verbose option is True
             if verbose:
                 print('Step number {}:'.format(n+1))
                 print('\tCurrent loss is: {}'.format(loss))
                 print('\tCurrent gradient is: {}'.format(gradient))
                 print('\tCurrent parameters are: {}'.format(self.params))
+                print('\tElapsed time is: {}'.format(time_list[-1]))
+
         """
         TODO: Stop criterion
         """
-        results = {'loss_list': loss_list, 'params_list': params_list}
+        results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
         return results
 
 
@@ -105,25 +109,28 @@ class SGD(GD):
         epoch: integer indicating how many maximum step are to be done
         verbose: boolean indicating if display step information. Default is 0
         """
-        # Initialize loss and weights lists
-        loss_list, params_list = [], []
+        # Initialize loss, weights and time lists
+        loss_list, params_list, time_list = [], [], []
         # Get number of rows
         m = X.shape[0]
         # Iterate through each required epoch
+        start_time = time.time()
         for n in range(num_epochs):
             # Choose a random realization among the input dataset
             for i in np.random.choice(m, m, replace=True):
                 # Update parameters, get loss and gradient
                 loss, gradient = self.step(X[i, :].reshape(1, -1), y[i, :])
-                # Store loss and gradient for current step
+                # Store loss, gradient and time for current step
                 loss_list.append(loss)
                 params_list.append(self.params)
+                time_list.append(time.time() - start_time)
                 # Verbose output
                 if verbose:
                     print('Step number {}:'.format(i+i*n+1))
                     print('\tCurrent loss is: {}'.format(loss))
                     print('\tCurrent gradient is: {}'.format(gradient))
                     print('\tCurrent parameters are: {}'.format(self.params))
+                    print('\tElapsed time is: {}'.format(time_list[-1]))
 
         """
         TODO: Stop criterion
@@ -142,9 +149,9 @@ class SAG(Optimizer):
         ik = np.random.choice(m)
         # Compute loss and gradient for i-th input vector
         loss = self.loss.compute_loss(X[ik, :].reshape(1, -1), y[ik, :], self.params)
-        gradient = self.loss.compute_gradient(X[ik, :].reshape(1,-1), y[ik, :], self.params)
+        gradient = self.loss.compute_gradient(X[ik, :].reshape(1, -1), y[ik, :], self.params)
         # Compute update vector
-        update = gamma * (gradient - g[ik,:].reshape(-1,1)) + 1/m * np.sum(g, axis=0).reshape(-1,1)
+        update = gamma * (gradient - g[ik, :].reshape(-1, 1)) + 1/m * np.sum(g, axis=0).reshape(-1, 1)
         # Update i-th row of g
         g[ik, :] = gradient.reshape(-1)
         # Update parameters with gradient
@@ -153,23 +160,26 @@ class SAG(Optimizer):
         return loss, gradient
 
     def run(self, X, y, num_epochs, verbose=0):
-        # Initialize lists of either loss and gradient
-        loss_list, params_list = [], []
+        # Initialize loss, weights and time lists
+        loss_list, params_list, time_list = [], [], []
         # Initialize g, matrix of previous epoch gradient
         g = np.zeros(X.shape)
         # Loop through each epoch
+        start_time = time.time()
         for n in range(num_epochs):
             # Compute update step for every epoch
             loss, gradient = self.step(X, y, g)
-            # Store loss and gradient for current step
+            # Store loss, gradient and time for current step
             loss_list.append(loss)
             params_list.append(self.params)
+            time_list.append(time.time() - start_time)
             # Verbose output
             if verbose:
                 print('Step number {}:'.format(n+1))
                 print('\tCurrent loss is: {}'.format(loss))
                 print('\tCurrent gradient is: {}'.format(gradient))
                 print('\tCurrent parameters are: {}'.format(self.params))
+                print('\tElapsed time is: {}'.format(time_list[-1]))
         results = {'loss_list': loss_list, 'params_list': params_list}
         return results
 
@@ -202,8 +212,9 @@ class SVRG(Optimizer):
 
     def run(self, X, y, num_epochs, verbose=0):
         # Initialize lists of either loss and gradient
-        loss_list, params_list = [], []
+        loss_list, params_list, time_list = [], [], []
         # Loop through each epoch
+        start_time = time.time()
         for n in range(num_epochs):
             # Compute update vector: start by rightmost part of the formula
             update = np.array([self.loss.compute_gradient(X[i, :], y[i, :], self.prev_params) for i in range(X.shape[0])])
@@ -211,15 +222,17 @@ class SVRG(Optimizer):
             for l in range(self.iter_epoch):
                 # Compute update step for every epoch
                 loss, gradient = self.step(X, y, update)
-                # Store loss and gradient for current step
+                # Store loss, gradient and time for current step
                 loss_list.append(loss)
                 params_list.append(self.params)
+                time_list.append(time.time() - start_time)
                 # Verbose output
                 if verbose:
                     print('Step number {}:'.format(l+l*n+1))
                     print('\tCurrent loss is: {}'.format(loss))
                     print('\tCurrent gradient is: {}'.format(gradient))
                     print('\tCurrent parameters are: {}'.format(self.params))
+                    print('\tElapsed time is: {}'.format(time_list[-1]))
             # Update stored parameters
             self.prev_params = self.params.copy()
         results = {'loss_list': loss_list, 'params_list': params_list}
