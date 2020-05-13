@@ -98,18 +98,9 @@ if __name__ == "__main__":
     import optimizer
     import loss
 
-    import argparse
-    import time
-    from tqdm import tqdm
-
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from matplotlib import cm
-
-    from sklearn.datasets import load_iris
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import MinMaxScaler
-    from sklearn.metrics import accuracy_score
 
 
     X = np.random.randint(-10, 10, (20, 1))
