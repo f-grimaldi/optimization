@@ -13,6 +13,7 @@ if __name__ == '__main__':
   from sklearn.model_selection import train_test_split
   from sklearn.preprocessing import MinMaxScaler
   from sklearn.metrics import accuracy_score
+  from sklearn.utils import shuffle
   from tabulate import tabulate
 
   ### Arguments
@@ -61,6 +62,8 @@ if __name__ == '__main__':
       y = y[y < 2]
       y[y == 0] = -1
       y = np.reshape(y, (-1, 1))
+      ### Splitting dataset
+      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
   ### MNIST with digit 1 and 7
   elif args.data == 'mnist':
       from scipy.io import loadmat
@@ -71,9 +74,26 @@ if __name__ == '__main__':
       y[y == 1] = 1
       y[y == 7] = -1
       y = np.reshape(y, (-1, 1))
+      ### Splitting dataset
+      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+  ### a9a
+  elif args.data == 'a9a':
+      X_train = np.genfromtxt('a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 1:]
+      y_train = np.genfromtxt('a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
+      X_test = np.genfromtxt('a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 1:]
+      y_test = np.genfromtxt('a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
+      # Balance
+      length = np.sum(y_train == 1)
+      idx1 = y_train.reshape(-1) == 1
+      idx0 = y_train.reshape(-1) == -1
+      X_train = np.concatenate((X_train[idx1, :], X_train[idx0, :][:length]), axis=0)
+      y_train = np.concatenate((y_train[idx1, :], y_train[idx0, :][:length]), axis=0)
+      # Shuffle
+      X_train, y_train = shuffle(X_train, y_train)
+      X = np.concatenate((X_train, X_test), axis=0)
+      y = np.concatenate((y_train, y_test), axis=0)
 
-  ### Splitting dataset
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+
 
   ### Parameters
   optim_params = {'type': args.optim, 'lr': args.lr, 'iter_epoch': args.iter_epoch, 'tollerance': args.tollerance}
