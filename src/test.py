@@ -25,7 +25,7 @@ if __name__ == '__main__':
                       help='fixed stepsize')
   parser.add_argument('--tollerance', type=float, default=0.001,
                       help='stopping criterion tollerance')
-  parser.add_argument('--iter_epoch', type=int, default=10,
+  parser.add_argument('--iter_epoch', type=int, default=5000,
                       help='iter epoch used only in svrg')
 
   # 2. Loss params
@@ -35,7 +35,7 @@ if __name__ == '__main__':
   # 3. Model fit params
   parser.add_argument('--init', type=str, default='zeros',
                       help='type of initialization: "zeros" or "random"')
-  parser.add_argument('--epochs', type=int, default=100,
+  parser.add_argument('--epochs', type=int, default=10,
                       help='number of epochs')
   parser.add_argument('--verbose', type=int, default=0,
                       help='display info: 0=False, 1=True')
@@ -202,6 +202,6 @@ if __name__ == '__main__':
   # Display Loss and Time at each Epoch
   disp = []
   for step in range(len(accuracy_list)):
-      if (step + 1) % (np.max([10, len(accuracy_list)//10])) == 0:
+      if (step + 1) % (np.max([2, len(accuracy_list)//10])) == 0:
         disp.append([step + 1, results["loss_list"][step], results["time_list"][step]])
   print(tabulate(disp, headers=['Step', 'Loss', 'Time']))
