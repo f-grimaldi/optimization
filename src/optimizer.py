@@ -138,54 +138,6 @@ class SGD(GD):
         return results
 
 
-class SAG(Optimizer):
-
-    def step(self, X, y, g):
-        # Initialize m and gamma
-        m = X.shape[0]
-        gamma = 1/m
-        # Get random row index in g
-        ik = np.random.choice(m)
-        # Compute loss and gradient for i-th input vector
-        loss = self.loss.compute_loss(X[ik, :].reshape(1, -1), y[ik, :], self.params)
-        gradient = self.loss.compute_gradient(X[ik, :].reshape(1, -1), y[ik, :], self.params)
-        # Compute update vector
-        update = gamma * (gradient - g[ik, :].reshape(-1, 1)) + 1/m * np.sum(g, axis=0).reshape(-1, 1)
-        # Update i-th row of g
-        g[ik, :] = gradient.reshape(-1)
-        # Update parameters with gradient
-        self.params = self.params - self.learn_rate * update
-        # Return either loss and gradient
-        return loss, gradient
-
-    def run(self, X, y, num_epochs, verbose=0):
-        # Initialize loss, weights and time lists
-        loss_list, params_list, time_list = [], [], []
-        # Initialize g, matrix of previous epoch gradient
-        g = np.zeros(X.shape)
-        # Loop through each epoch
-        start_time = time.time()
-        for n in range(num_epochs):
-            # Compute update step for every epoch
-            loss, gradient = self.step(X, y, g)
-            # Store loss, gradient and time for current step
-            loss_list.append(loss)
-            params_list.append(self.params)
-            time_list.append(time.time() - start_time)
-            # Verbose output
-            if verbose:
-                print('Step number {}:'.format(n+1))
-                print('\tCurrent loss is: {}'.format(loss))
-                print('\tCurrent gradient is: {}'.format(gradient))
-                print('\tCurrent parameters are: {}'.format(self.params))
-                print('\tElapsed time is: {}'.format(time_list[-1]))
-            ### Stopping criterion
-            if np.linalg.norm(gradient) < self.tollerance:
-                break
-        results = {'loss_list': loss_list, 'params_list': params_list, 'time_list': time_list}
-        return results
-
-
 class SVRG(Optimizer):
 
     # Constructor
@@ -196,7 +148,7 @@ class SVRG(Optimizer):
         self.prev_params = params if not prev_params else prev_params
         self.iter_epoch = iter_epoch
 
-    def step(self, X, y, update):
+    def step(self, X, y, prev_gradients):
         # Initialize m and gamma
         m = X.shape[0]
         gamma = 1
@@ -205,8 +157,10 @@ class SVRG(Optimizer):
         # Compute loss and gradient for i-th input vector
         loss = self.loss.compute_loss(X[ik, :].reshape(1, -1), y[ik, :], self.params)
         gradient = self.loss.compute_gradient(X[ik, :].reshape(1, -1), y[ik, :], self.params)
+        # Compute gradient for ik-th observation using previous parameters
+        prev_gradient_ik = self.loss.compute_gradient(X[ik, :].reshape(1, -1), y[ik, :], self.prev_params)
         # Then add leftmost side of the formula
-        update = gamma * (gradient - update[ik, :]) + 1/m * np.sum(update, axis=0)
+        update = gamma * (gradient - prev_gradient_ik) + prev_gradients
         # Update parameters with gradient
         self.params = self.params - self.learn_rate * update
         # Return either loss and gradient
@@ -219,11 +173,11 @@ class SVRG(Optimizer):
         start_time = time.time()
         for n in range(num_epochs):
             # Compute update vector: start by rightmost part of the formula
-            update = np.array([self.loss.compute_gradient(X[i, :], y[i, :], self.prev_params) for i in range(X.shape[0])])
+            prev_gradients = self.loss.compute_gradient(X, y, self.prev_params)
             # Loop through each observation in epoch
             for l in range(self.iter_epoch):
                 # Compute update step for every epoch
-                loss, gradient = self.step(X, y, update)
+                loss, gradient = self.step(X, y, prev_gradients)
                 # Store loss, gradient and time for current step
                 loss_list.append(loss)
                 params_list.append(self.params)

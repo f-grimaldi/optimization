@@ -51,8 +51,8 @@ if __name__ == '__main__':
   args = parser.parse_args()
   if args.seed:
       np.random.seed(args.seed)
-
-  print('MAIN\n-Solving a binary classification problem (-1, 1) with two classes of {} dataset'.format(args.data.upper()))
+  print('Starting testing... Be sure to run the script from the main folder (C:/.../optimization) as python src/test.py "arguments" otherwise there could be some "FileNotFound Error"')
+  print('\nMAIN\n-Solving a binary classification problem (-1, 1) with two classes of {} dataset'.format(args.data.upper()))
   ### Loading and preparing data
   ### IRIS
   if args.data == 'iris':
@@ -67,7 +67,7 @@ if __name__ == '__main__':
   ### MNIST with digit 1 and 7
   elif args.data == 'mnist':
       from scipy.io import loadmat
-      mnist = loadmat('MNIST.mat')
+      mnist = loadmat('data/MNIST.mat')
       X, y = mnist['input_images'], mnist['output_labels']
       X = X[(y.reshape(-1) == 1) | (y.reshape(-1) == 7)]
       y = y[(y == 1) | (y == 7)]
@@ -78,10 +78,10 @@ if __name__ == '__main__':
       X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
   ### a9a
   elif args.data == 'a9a':
-      X_train = np.genfromtxt('a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 1:]
-      y_train = np.genfromtxt('a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
-      X_test = np.genfromtxt('a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 1:]
-      y_test = np.genfromtxt('a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
+      X_train = np.genfromtxt('data/a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 1:]
+      y_train = np.genfromtxt('data/a9a/a9a_train.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
+      X_test = np.genfromtxt('data/a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 1:]
+      y_test = np.genfromtxt('data/a9a/a9a_test.csv', delimiter=',', skip_header=True)[:, 0].reshape(-1, 1)
       # Balance
       length = np.sum(y_train == 1)
       idx1 = y_train.reshape(-1) == 1
@@ -111,8 +111,6 @@ if __name__ == '__main__':
   if optim_params['type'] == 'gd':
       optim = optimizer.GD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
   elif optim_params['type'] == 'sgd':
-      optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
-  elif optim_params['type'] == 'sag':
       optim = optimizer.SGD(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'])
   elif optim_params['type'] == 'svrg':
       optim = optimizer.SVRG(params=model.weights, loss=my_loss, learn_rate=optim_params['lr'], tollerance=optim_params['tollerance'], iter_epoch=optim_params['iter_epoch'])
@@ -169,7 +167,7 @@ if __name__ == '__main__':
   X_testb = model.add_bias(X_test)
   accuracy_list = []
 
-  print('Starting to compute accuracy on every step.')
+  print('-Starting to compute accuracy on every step.')
   print('If it takes too long maybe is because using SGD with a discrete number of epochs')
   for weights in tqdm(results['params_list']):
       # 1. Get output
@@ -203,7 +201,7 @@ if __name__ == '__main__':
 
   # Display Loss and Time at each Epoch
   disp = []
-  for epoch in range(fit_params["epoch"]):
-      if (epoch + 1) % 10 == 0:
-        disp.append([epoch + 1, results["loss_list"][epoch], results["time_list"][epoch]])
-  print(tabulate(disp, headers=['Epoch', 'Loss', 'Time']))
+  for step in range(len(accuracy_list)):
+      if (step + 1) % (np.max([10, len(accuracy_list)//10])) == 0:
+        disp.append([step + 1, results["loss_list"][step], results["time_list"][step]])
+  print(tabulate(disp, headers=['Step', 'Loss', 'Time']))

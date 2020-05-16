@@ -143,16 +143,16 @@ if __name__ == "__main__":
     plt.scatter(results1['params_list'][:-1], results1['loss_list'][1:], c='r', s=15, label='Classic')
     plt.plot([float(i) for i in results1['params_list'][:-1]], results1['loss_list'][1:], c='r')
 
-    plt.scatter(results2['params_list'][:-1], results2['loss_list'][1:], c='green', s=15, label = 'SGD')
-    plt.plot([float(i) for i in results2['params_list'][:-1]], results2['loss_list'][1:], c='green')
+    plt.scatter(results2['params_list'][:-1], results2['loss_list'][1:], c='orange', s=15, label = 'SGD')
+    plt.plot([float(i) for i in results2['params_list'][:-1]], results2['loss_list'][1:], c='orange')
 
-    plt.scatter(results4['params_list'][:-1], results4['loss_list'][1:], c='brown', s=15, label='SVRG')
-    plt.plot([float(i) for i in results4['params_list'][:-1]], results4['loss_list'][1:], c='brown')
+    plt.scatter(results4['params_list'][:-1], results4['loss_list'][1:], c='grey', s=15, label='SVRG')
+    plt.plot([float(i) for i in results4['params_list'][:-1]], results4['loss_list'][1:], c='grey')
 
     plt.axvline(x=np.argmin(losses)*lims[2]+lims[0], c='black', label='Minimum')
     plt.xlabel('W')
     plt.ylabel('l(W; (X,y))')
-    plt.title('2D dimension example')
+    plt.title('1D example')
     plt.legend()
     plt.grid()
     plt.show()
@@ -213,11 +213,11 @@ if __name__ == "__main__":
     # cset = ax.contourf(W1, W2, losses, zdir='x', offset=-5, cmap=cm.ocean)
     # cset = ax.contourf(W1, W2, losses, zdir='y', offset=5, cmap=cm.ocean)
     ax.scatter(p11[:-1], p12[:-1], results1['loss_list'][1:],
-               color="r", s=15, label='Classic')
-    ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
-               color="orange", s=15, label='SGD')
-    ax.scatter(p21[:-1], p22[:-1], results2['loss_list'][1:],
-                color="brown", s=15, label='SVRG')
+               color="r", s=40, label='Classic')
+    ax.scatter(p21[:-281], p22[:-281], results2['loss_list'][1:-280],
+               color="orange", s=40, label='SGD')
+    ax.scatter(p41[:-161], p42[:-161], results4['loss_list'][1:-160],
+                color="black", s=40, label='SVRG')
     ax.legend(loc=(0.1, 0.75), frameon=0)
     ax.set_xlabel('X1')
     ax.set_ylabel('X2')

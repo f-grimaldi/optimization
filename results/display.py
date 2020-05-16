@@ -1,7 +1,7 @@
 import json
 import numpy as np
 
-file = 'result_v1.json'
+file = 'result_v2.json'
 with open(file, 'r') as f:
     data = json.load(f)
 
